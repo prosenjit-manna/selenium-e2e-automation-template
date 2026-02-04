@@ -1,0 +1,49 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo Installing Chrome and dependencies...
+      - curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+      - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
+      - apt-get update
+      - apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends
+      - wget https://github.com/allure-framework/allure2/releases/download/2.25.0/allure-2.25.0.tgz
+      - tar -zxvf allure-2.25.0.tgz -C /opt/
+      - ln -s /opt/allure-2.25.0/bin/allure /usr/bin/allure
+      
+  pre_build:
+    commands:
+      - echo Installing NPM dependencies...
+      - npm install
+      - echo Setting environment variables...
+      - export BROWSER=chrome
+      - export HEADLESS=true
+      - export DISPLAY=:99
+      
+  build:
+    commands:
+      - echo Running E2E tests...
+      - npm test || true
+      - echo Generating Allure report...
+      - npm run allure:generate || true
+      
+  post_build:
+    commands:
+      - echo Tests completed
+      - echo Uploading reports to S3...
+      - aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+      - aws s3 sync screenshots s3://${REPORT_BUCKET}/screenshots/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+
+artifacts:
+  files:
+    - allure-results/**/*
+    - allure-report/**/*
+    - screenshots/**/*
+  name: selenium-test-results
+
+cache:
+  paths:
+    - 'node_modules/**/*'
