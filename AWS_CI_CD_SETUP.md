@@ -50,8 +50,8 @@ Before starting, ensure you have:
 1. Go to **AWS S3 Console**: https://console.aws.amazon.com/s3/
 
 2. Click **Create bucket**
-   - Bucket name: `selenium-test-reports-yourcompany` (must be globally unique)
-   - AWS Region: `us-east-1` (or your preferred region)
+   - Bucket name: `selenium-test-reports-v1` (must be globally unique)
+   - AWS Region: `ap-south-1` (or your preferred region)
    - Block Public Access: Uncheck if you want public reports access
    - Click **Create bucket**
 
@@ -76,7 +76,7 @@ Before starting, ensure you have:
       "Effect": "Allow",
       "Principal": "*",
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::selenium-test-reports-yourcompany/*"
+      "Resource": "arn:aws:s3:::selenium-test-reports-v1/*"
     }
   ]
 }
@@ -116,8 +116,8 @@ Before starting, ensure you have:
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::selenium-test-reports-yourcompany",
-        "arn:aws:s3:::selenium-test-reports-yourcompany/*"
+        "arn:aws:s3:::selenium-test-reports-v1",
+        "arn:aws:s3:::selenium-test-reports-v1/*"
       ]
     },
     {
@@ -133,7 +133,7 @@ Before starting, ensure you have:
 }
 ```
 
-### Step 3: Create CodeBuild Project
+### Step 3: Create CodeBuild Project - Meeting 2
 
 1. Go to **AWS CodeBuild Console**: https://console.aws.amazon.com/codebuild/
 
