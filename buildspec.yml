@@ -33,23 +33,37 @@ phases:
   post_build:
     commands:
       - echo Tests completed
-      - echo Checking environment variables...
+      - echo "=== Checking environment variables ==="
       - echo "REPORT_BUCKET=${REPORT_BUCKET}"
       - echo "AWS_REGION=${AWS_REGION}"
-      - echo Uploading reports to S3...
+      - echo "=== Checking generated files ==="
+      - ls -la
+      - echo "=== Checking allure-results ==="
+      - ls -la allure-results/ || echo "No allure-results directory"
+      - echo "=== Checking allure-report ==="
+      - ls -la allure-report/ || echo "No allure-report directory"
+      - echo "=== Checking screenshots ==="
+      - ls -la screenshots/ || echo "No screenshots directory"
+      - find screenshots -type f 2>/dev/null | wc -l | xargs echo "Screenshot count:"
+      - echo "=== Uploading reports to S3 ==="
       - |
         if [ -d "allure-report" ]; then
           echo "Uploading allure-report..."
-          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION} || echo "Failed to upload allure-report"
         else
           echo "No allure-report directory found, skipping upload"
         fi
       - |
-        if [ -d "screenshots" ] && [ "$(ls -A screenshots)" ]; then
-          echo "Uploading screenshots..."
-          aws s3 sync screenshots s3://${REPORT_BUCKET}/screenshots/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+        if [ -d "screenshots" ]; then
+          FILE_COUNT=$(find screenshots -type f 2>/dev/null | wc -l)
+          if [ "$FILE_COUNT" -gt 0 ]; then
+            echo "Found $FILE_COUNT screenshot(s), uploading..."
+            aws s3 sync screenshots s3://${REPORT_BUCKET}/screenshots/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION} || echo "Failed to upload screenshots"
+          else
+            echo "Screenshots directory is empty, skipping upload"
+          fi
         else
-          echo "No screenshots directory or empty, skipping upload"
+          echo "No screenshots directory found, skipping upload"
         fi
 
 artifacts:
