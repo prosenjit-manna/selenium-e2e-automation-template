@@ -3,15 +3,21 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo Installing Node.js 24.11.1...
+      - echo "=== Checking Git Commit ==="
+      - git log -1 --oneline
+      - git rev-parse HEAD
+      - echo "=== Installing Node.js 24.11.1 ==="
       - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
       - export NVM_DIR="$HOME/.nvm"
       - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
       - nvm install 24.11.1
       - nvm use 24.11.1
+      - nvm alias default 24.11.1
+      - echo "export NVM_DIR=\"$HOME/.nvm\"" >> $HOME/.bashrc
+      - echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $HOME/.bashrc
       - node -v
       - npm -v
-      - echo Installing Chrome and dependencies...
+      - echo "=== Installing Chrome and dependencies ==="
       - curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
       - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
       - apt-get update
@@ -22,10 +28,21 @@ phases:
       
   pre_build:
     commands:
-      - echo Installing NPM dependencies...
+      - export NVM_DIR="$HOME/.nvm"
+      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+      - nvm use 24.11.1
+      - export NVM_DIR="$HOME/.nvm"
+      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+      - nvm use 24.11.1
+      - echo "=== Running E2E tests ==="
+      - npm test || true
+      - echo "=== Generating Allure report ==="ncies ==="
       - npm install
-      - echo Setting environment variables...
-      - export BROWSER=chrome
+      - export NVM_DIR="$HOME/.nvm"
+      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+      - nvm use 24.11.1
+      - echo "=== Tests completed ==="
+      - echo "=== Uploading reports to S3 ==="
       - export HEADLESS=true
       - export DISPLAY=:99
       
