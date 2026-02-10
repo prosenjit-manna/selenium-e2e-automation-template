@@ -25,6 +25,9 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=24.11.1"
+  },
   "dependencies": {
     "allure-jest": "^3.4.5",
     "selenium-webdriver": "^4.16.0"

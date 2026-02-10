@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 18
+      nodejs: 24
     commands:
       - echo Installing Chrome and dependencies...
       - curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -

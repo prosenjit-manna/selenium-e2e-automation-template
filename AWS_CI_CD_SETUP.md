@@ -183,7 +183,7 @@ Before starting, ensure you have:
 
 9. **Artifacts**:
    - Type: **Amazon S3**
-   - Bucket name: `selenium-test-reports-yourcompany`
+   - Bucket name: `selenium-test-reports-v1`
    - Name: `test-results`
    - Path: `artifacts/`
    - Artifacts packaging: **Zip**
@@ -198,8 +198,8 @@ Before starting, ensure you have:
     
     | Name | Value | Type |
     |------|-------|------|
-    | `REPORT_BUCKET` | `selenium-test-reports-yourcompany` | Plaintext |
-    | `AWS_REGION` | `us-east-1` | Plaintext |
+    | `REPORT_BUCKET` | `selenium-test-reports-v1` | Plaintext |
+    | `AWS_REGION` | `ap-south-1` | Plaintext |
     | `BROWSER` | `chrome` | Plaintext |
     | `HEADLESS` | `true` | Plaintext |
     | `NODE_ENV` | `production` | Plaintext |
