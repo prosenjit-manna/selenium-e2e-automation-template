@@ -33,9 +33,24 @@ phases:
   post_build:
     commands:
       - echo Tests completed
+      - echo Checking environment variables...
+      - echo "REPORT_BUCKET=${REPORT_BUCKET}"
+      - echo "AWS_REGION=${AWS_REGION}"
       - echo Uploading reports to S3...
-      - aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
-      - aws s3 sync screenshots s3://${REPORT_BUCKET}/screenshots/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+      - |
+        if [ -d "allure-report" ]; then
+          echo "Uploading allure-report..."
+          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+        else
+          echo "No allure-report directory found, skipping upload"
+        fi
+      - |
+        if [ -d "screenshots" ] && [ "$(ls -A screenshots)" ]; then
+          echo "Uploading screenshots..."
+          aws s3 sync screenshots s3://${REPORT_BUCKET}/screenshots/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION}
+        else
+          echo "No screenshots directory or empty, skipping upload"
+        fi
 
 artifacts:
   files:
