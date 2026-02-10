@@ -2,9 +2,15 @@ version: 0.2
 
 phases:
   install:
-    runtime-versions:
-      nodejs: 24
     commands:
+      - echo Installing Node.js 24.11.1...
+      - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+      - export NVM_DIR="$HOME/.nvm"
+      - '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
+      - nvm install 24.11.1
+      - nvm use 24.11.1
+      - node -v
+      - npm -v
       - echo Installing Chrome and dependencies...
       - curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
       - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
