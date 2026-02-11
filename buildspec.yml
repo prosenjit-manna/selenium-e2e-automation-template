@@ -5,14 +5,28 @@ phases:
     runtime-versions:
       nodejs: 24
     commands:
-      - echo Installing Chrome and dependencies...
+      - echo "=== Installing Chrome and dependencies ==="
       - curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
       - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
       - apt-get update
       - apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 --no-install-recommends
+      - google-chrome --version
+      - echo "=== Installing Firefox ==="
+      - apt-get install -y firefox-esr
+      - firefox --version
+      - echo "=== Installing Microsoft Edge ==="
+      - curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+      - install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+      - sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" > /etc/apt/sources.list.d/microsoft-edge.list'
+      - rm microsoft.gpg
+      - apt-get update
+      - apt-get install -y microsoft-edge-stable
+      - microsoft-edge --version
+      - echo "=== Installing Allure ==="
       - wget https://github.com/allure-framework/allure2/releases/download/2.25.0/allure-2.25.0.tgz
       - tar -zxvf allure-2.25.0.tgz -C /opt/
       - ln -s /opt/allure-2.25.0/bin/allure /usr/bin/allure
+      - allure --version
       
   pre_build:
     commands:
