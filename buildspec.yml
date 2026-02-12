@@ -30,19 +30,27 @@ phases:
       
   pre_build:
     commands:
-      - echo Installing NPM dependencies...
+      - echo "=== Installing NPM dependencies ==="
       - npm install
-      - echo Setting environment variables...
+      - echo "=== Downloading previous Allure history ==="
+      - |
+        aws s3 sync s3://${REPORT_BUCKET}/reports/latest/history allure-results/history --region ${AWS_REGION} || echo "No previous history found, starting fresh"
+      - ls -la allure-results/ || mkdir -p allure-results
+      - echo "=== Setting environment variables ==="
       - export BROWSER=chrome
       - export HEADLESS=true
       - export DISPLAY=:99
       
   build:
     commands:
-      - echo Running E2E tests...
+      - echo "=== Running E2E tests ==="
       - npm test || true
-      - echo Generating Allure report...
+      - echo "=== Checking allure-results before report generation ==="
+      - ls -la allure-results/
+      - echo "=== Generating Allure report with history ==="
       - npm run allure:generate || true
+      - echo "=== Verifying history was preserved ==="
+      - ls -la allure-report/history/ || echo "No history generated"
       
   post_build:
     commands:
@@ -62,8 +70,13 @@ phases:
       - echo "=== Uploading reports to S3 ==="
       - |
         if [ -d "allure-report" ]; then
-          echo "Uploading allure-report..."
-          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/$(date +%Y%m%d-%H%M%S)/ --region ${AWS_REGION} || echo "Failed to upload allure-report"
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          echo "Uploading allure-report to timestamped folder..."
+          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/${TIMESTAMP}/ --region ${AWS_REGION} || echo "Failed to upload allure-report"
+          echo "Uploading allure-report to 'latest' folder for history preservation..."
+          aws s3 sync allure-report s3://${REPORT_BUCKET}/reports/latest/ --region ${AWS_REGION} --delete || echo "Failed to upload latest report"
+          echo "Latest report URL: https://${REPORT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/reports/latest/index.html"
+          echo "Timestamped report URL: https://${REPORT_BUCKET}.s3.${AWS_REGION}.amazonaws.com/reports/${TIMESTAMP}/index.html"
         else
           echo "No allure-report directory found, skipping upload"
         fi

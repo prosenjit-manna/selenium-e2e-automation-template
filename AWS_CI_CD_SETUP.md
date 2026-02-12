@@ -737,6 +737,67 @@ docker run -d -p 5050:5050 \
 
 ---
 
+## Allure Report History Preservation
+
+The pipeline is configured to preserve Allure report history across builds, enabling:
+- **Trend charts** - Track test execution trends over time
+- **Retry tracking** - See test retry attempts
+- **Flaky test detection** - Identify tests that pass/fail intermittently
+- **Duration trends** - Monitor test execution time changes
+
+### How It Works
+
+1. **Before Tests Run**: The pipeline downloads the previous report's history from S3:
+   ```
+   s3://your-bucket/reports/latest/history → allure-results/history
+   ```
+
+2. **After Tests Complete**: Allure generates a new report that includes historical data
+
+3. **Upload to S3**: Reports are saved to two locations:
+   - **Timestamped**: `s3://bucket/reports/YYYYMMDD-HHMMSS/` - Permanent archive
+   - **Latest**: `s3://bucket/reports/latest/` - Used for next build's history
+
+### Accessing Reports
+
+**Latest Report (with full history)**:
+```
+https://your-bucket.s3.your-region.amazonaws.com/reports/latest/index.html
+```
+
+**Specific Build Report**:
+```
+https://your-bucket.s3.your-region.amazonaws.com/reports/20260212-143022/index.html
+```
+
+### S3 Bucket Structure
+
+```
+selenium-test-reports-v1/
+├── reports/
+│   ├── latest/               # Always contains most recent report
+│   │   ├── index.html
+│   │   ├── history/          # History data for next build
+│   │   └── ...
+│   ├── 20260212-143022/      # Timestamped reports (permanent)
+│   ├── 20260211-091545/
+│   └── ...
+└── screenshots/
+    ├── 20260212-143022/
+    └── ...
+```
+
+### Troubleshooting History
+
+If history is not showing:
+
+1. **Check S3 bucket**: Verify `reports/latest/history/` exists
+2. **Check build logs**: Look for "Downloading previous Allure history" messages
+3. **IAM permissions**: Ensure CodeBuild role has `s3:GetObject` on the bucket
+4. **First run**: History only appears after the second successful build
+
+---
+
 ## Notifications
 
 ### SNS Notifications for Test Results
