@@ -32,10 +32,14 @@ phases:
     commands:
       - echo "=== Installing NPM dependencies ==="
       - npm install
+      - echo "=== Setting up allure-results directory ==="
+      - mkdir -p allure-results/history
       - echo "=== Downloading previous Allure history ==="
       - |
-        aws s3 sync s3://${REPORT_BUCKET}/reports/latest/history allure-results/history --region ${AWS_REGION} || echo "No previous history found, starting fresh"
-      - ls -la allure-results/ || mkdir -p allure-results
+        aws s3 sync s3://${REPORT_BUCKET}/reports/latest/history/ allure-results/history/ --region ${AWS_REGION} || echo "No previous history found, starting fresh"
+      - echo "History files downloaded:"
+      - ls -la allure-results/history/ || echo "No history files"
+      - ls -la allure-results/
       - echo "=== Setting environment variables ==="
       - export BROWSER=chrome
       - export HEADLESS=true
@@ -47,10 +51,14 @@ phases:
       - npm test || true
       - echo "=== Checking allure-results before report generation ==="
       - ls -la allure-results/
+      - echo "Checking history folder:"
+      - ls -la allure-results/history/ || echo "No history folder"
       - echo "=== Generating Allure report with history ==="
-      - npm run allure:generate || true
+      - allure generate allure-results -o allure-report || true
       - echo "=== Verifying history was preserved ==="
       - ls -la allure-report/history/ || echo "No history generated"
+      - echo "History files in report:"
+      - find allure-report/history -type f 2>/dev/null | head -20 || echo "No history files found"
       
   post_build:
     commands:
