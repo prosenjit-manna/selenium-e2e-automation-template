@@ -4,7 +4,8 @@
   "description": "Selenium and Jest based E2E cross-browser testing template with Allure reporting",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "jest": "jest",
+    "test": "mkdir -p allure-results/history && cp -r allure-report/history/* allure-results/history/ 2>/dev/null || true && jest && allure generate allure-results -o allure-report",
     "test:chrome": "BROWSER=chrome jest",
     "test:firefox": "BROWSER=firefox jest",
     "test:edge": "BROWSER=edge jest",
